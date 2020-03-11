@@ -1,10 +1,9 @@
-package com.alexandermilne.awsimageupload.datastore;
+package com.alexandermilne.mapBackend.datastore;
 
-import com.alexandermilne.awsimageupload.profile.UserProfile;
+import com.alexandermilne.mapBackend.profile.UserProfile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface UserDao {
@@ -16,11 +15,14 @@ public interface UserDao {
         return  insertPerson(id, person);
    }
      **/
-    public List<UserProfile> getUserProfiles();
+    List<UserProfile> getUserProfiles();
 
     int uploadUserProfileImage(UUID userProfileId, MultipartFile file);
+    int uploadVideoToAws(UUID userProfileId, MultipartFile file);
+
+
     //List<Person> selectAllPeople();
-/**
+/*
     Optional<Person> selectPersonById(UUID id);
 
     int deletePersonById(UUID id);

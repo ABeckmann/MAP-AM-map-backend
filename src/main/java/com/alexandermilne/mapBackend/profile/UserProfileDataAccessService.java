@@ -1,19 +1,14 @@
-package com.alexandermilne.awsimageupload.profile;
+package com.alexandermilne.mapBackend.profile;
 
-import com.alexandermilne.awsimageupload.bucket.BucketName;
-import com.alexandermilne.awsimageupload.datastore.UserDao;
-import com.alexandermilne.awsimageupload.filestore.FileStore;
+import com.alexandermilne.mapBackend.bucket.ImageBucketName;
+import com.alexandermilne.mapBackend.bucket.VideoBucketName;
+import com.alexandermilne.mapBackend.datastore.UserDao;
+import com.alexandermilne.mapBackend.filestore.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -56,6 +51,60 @@ public class UserProfileDataAccessService {
         return userDao.getUserProfiles();
     }
 
+    private String getVideoPathFormat(UserProfile user) {
+        return String.format("%s/%s", VideoBucketName.PROFILE_IMAGE.getBucketName(), user.getUserProfileId());
+    }
+
+    public int uploadVideoToAws(UUID userProfileId, MultipartFile file) {
+
+        if (file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [" + file.getSize() + "]");
+        }
+
+        if (file.getSize() > 536870912) {
+            throw new IllegalStateException("file is greater than 500MB: " + file.getSize() );
+        }
+        //TODO file already uploaded
+        if (false) { //file.getOriginalFilename()
+            return 0;
+        }
+
+        //Check file is correct type
+        //IMAGE_JPEG.getMineType()
+        if (Arrays.asList("video/mp4").contains(file.getContentType())) {
+            throw new IllegalStateException("File must be mp4 [" + file.getContentType() + "]");
+        }
+
+        //get the db user
+        UserProfile user = getUserProfileOrThrow(userProfileId);
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        //store image in AWS db
+        String path = getPathFormat(user);
+        String filename = String.format("%s", file.getOriginalFilename());
+        try {
+            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+            user.setUserProfileImageLink(filename);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+
+        return userDao.uploadVideoToAws(userProfileId, file);
+    }
+
+    public byte[] downloadVideo(UUID userProfileId) {
+        UserProfile user = getUserProfileOrThrow(userProfileId);
+        String path = getPathFormat(user);
+
+        return user.getUserProfileImageLink()
+                .map(key -> fileStore.download(path, key))
+                .orElse(new byte[0]);
+    }
+
     public int uploadUserProfileImage(UUID userProfileId, MultipartFile file) {
 
         //Check file is not null
@@ -92,7 +141,7 @@ public class UserProfileDataAccessService {
     }
 
     private String getPathFormat(UserProfile user) {
-        return String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), user.getUserProfileId());
+        return String.format("%s/%s", ImageBucketName.PROFILE_IMAGE.getBucketName(), user.getUserProfileId());
     }
 
     private UserProfile getUserProfileOrThrow(UUID userProfileId) {

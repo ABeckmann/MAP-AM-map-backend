@@ -1,4 +1,4 @@
-package com.alexandermilne.awsimageupload.profile;
+package com.alexandermilne.mapBackend.profile;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

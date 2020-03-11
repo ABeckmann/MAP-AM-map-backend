@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.alexander-milne</groupId>
-	<artifactId>aws-image-upload</artifactId>
+	<artifactId>map-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>aws-image-upload</name>
+	<name>map-backend</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

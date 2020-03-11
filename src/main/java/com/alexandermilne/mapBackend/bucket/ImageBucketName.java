@@ -1,12 +1,12 @@
-package com.alexandermilne.awsimageupload.bucket;
+package com.alexandermilne.mapBackend.bucket;
 
-public enum BucketName {
+public enum ImageBucketName {
 
     PROFILE_IMAGE("testing-image-upload");
 
     private final String bucketName;
 
-    BucketName(String bucketName) {
+    ImageBucketName(String bucketName) {
         this.bucketName = bucketName;
     }
 

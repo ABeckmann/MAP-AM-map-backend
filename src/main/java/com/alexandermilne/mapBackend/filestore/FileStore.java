@@ -1,4 +1,4 @@
-package com.alexandermilne.awsimageupload.filestore;
+package com.alexandermilne.mapBackend.filestore;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;

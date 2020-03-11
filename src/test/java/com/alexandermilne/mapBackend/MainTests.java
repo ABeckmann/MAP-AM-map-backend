@@ -1,4 +1,4 @@
-package com.alexandermilne.awsimageupload;
+package com.alexandermilne.mapBackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

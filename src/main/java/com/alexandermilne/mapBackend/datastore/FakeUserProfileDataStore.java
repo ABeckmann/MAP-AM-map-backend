@@ -1,18 +1,13 @@
-package com.alexandermilne.awsimageupload.datastore;
+package com.alexandermilne.mapBackend.datastore;
 
 
-import com.alexandermilne.awsimageupload.profile.UserProfile;
-import org.apache.http.entity.ContentType;
+import com.alexandermilne.mapBackend.profile.UserProfile;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static org.apache.http.entity.ContentType.*;
 
 @Repository("fakeDao")
 public class FakeUserProfileDataStore implements UserDao {
@@ -40,9 +35,13 @@ public class FakeUserProfileDataStore implements UserDao {
     @Override
     public int uploadUserProfileImage(UUID userProfileId, MultipartFile file) {
 
-
+        return 0;
+    }
+    @Override
+    public int uploadVideoToAws(UUID userProfileId, MultipartFile file) {
 
         return 0;
     }
+
 
 }
