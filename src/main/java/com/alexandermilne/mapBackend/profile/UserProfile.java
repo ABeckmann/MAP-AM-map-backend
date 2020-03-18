@@ -13,6 +13,7 @@ public class UserProfile {
     @NotBlank
     private String username;
     private String userProfileImageLink; //s3 key
+    private String userVideoLink;
 
     public UserProfile(@JsonProperty("userProfileId") UUID userProfileId, @JsonProperty("username") String username, @JsonProperty("userProfileImageLink") String userProfileImageLink) {
         this.userProfileId = userProfileId;
