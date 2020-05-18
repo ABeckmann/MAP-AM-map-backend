@@ -3,7 +3,7 @@ package com.alexandermilne.mapBackend.profile;
 import com.alexandermilne.mapBackend.bucket.ImageBucketName;
 import com.alexandermilne.mapBackend.bucket.VideoBucketName;
 import com.alexandermilne.mapBackend.datastore.UserDao;
-import com.alexandermilne.mapBackend.filestore.FileStore;
+import com.alexandermilne.mapBackend.filestore.s3.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
