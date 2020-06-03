@@ -1,13 +1,13 @@
 package com.alexandermilne.mapBackend.filestore.local.storage;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -35,6 +35,51 @@ public class FileSystemStorageService implements StorageService {
 	}
 
 	@Override
+	public Path getStoragePath(UUID userId, String filename) {
+		return this.rootLocation.resolve(userId.toString()).resolve(StringUtils.stripFilenameExtension(filename));
+	}
+
+	public Optional<Path> findStoragePathByFilename(String filename) throws IOException {
+		String glob = String.format("glob:%s/*/%s/video.mp4",this.rootLocation.toString(), filename); //
+		//match(glob, rootLocation.toString());
+
+
+		PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(glob);
+		return Files.walk(Paths.get(this.rootLocation.toString())).filter(pathMatcher::matches).findFirst();
+
+		//return this.rootLocation.resolve(userId.toString()).resolve(StringUtils.stripFilenameExtension(filename));
+	}
+//	public String match(String glob, String location) throws IOException {
+//		PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(glob);
+//		Files.walkFileTree(Paths.get(location), new SimpleFileVisitor<Path>() {
+//			@Override
+//			public FileVisitResult visitFile(Path path,
+//											 BasicFileAttributes attrs) throws IOException {
+//				if (pathMatcher.matches(path)) {
+//					System.out.println(path);
+//				}
+//				return FileVisitResult.CONTINUE;
+//			}
+//
+//			@Override
+//			public FileVisitResult visitFileFailed(Path file, IOException exc)
+//					throws IOException {
+//				return FileVisitResult.CONTINUE;
+//			}
+//		});
+//		return null;
+//	}
+
+	@Override
+	public Path getIconLink(UUID userId, String filename) {
+		return getStoragePath(userId, filename).resolve("incons");
+	}
+
+	public Path getVideoLink(UUID userId, String filename) {
+		return getStoragePath(userId, filename).resolve("video.mp4");
+	}
+
+	@Override
 	public void store(UUID userId, MultipartFile file) {
 		//TODO ensure that user exists
 		String filename = StringUtils.cleanPath(file.getOriginalFilename());
@@ -50,12 +95,14 @@ public class FileSystemStorageService implements StorageService {
 			}
 			try (InputStream inputStream = file.getInputStream()) {
 				//System.out.println(this.rootLocation.resolve(StringUtils.stripFilenameExtension(filename)).resolve("video.mp4"));
-				Path StoragePath = this.rootLocation.resolve(userId.toString()).resolve(StringUtils.stripFilenameExtension(filename));
+				Path StoragePath = getStoragePath(userId, filename);
 				Path vidPath = StoragePath.resolve("video.mp4");
 
 				Files.createDirectories(StoragePath);
 				Files.copy(inputStream, vidPath,
 					StandardCopyOption.REPLACE_EXISTING);
+				Path IconsStoragePath = StoragePath.resolve("incons");
+				Files.createDirectories(IconsStoragePath);
 
 				try {
 					FFmpegFrameGrabber g = new FFmpegFrameGrabber(vidPath.toString());
@@ -63,7 +110,7 @@ public class FileSystemStorageService implements StorageService {
 
 					Java2DFrameConverter c = new Java2DFrameConverter();
 					for (int i = 0 ; i < 200; i++) {
-						ImageIO.write(c.convert(g.grabImage()), "png", new File(StoragePath.resolve(i+"icon.png").toString()));
+						ImageIO.write(c.convert(g.grabImage()), "png", new File(IconsStoragePath.resolve(i+"icon.png").toString()));
 					}
 					g.stop();
 				}
@@ -96,6 +143,84 @@ public class FileSystemStorageService implements StorageService {
 	@Override
 	public Path load(String filename) {
 		return rootLocation.resolve(filename);
+	}
+
+	@Override
+	public Resource loadIconAsResource(UUID userId, String filename) {
+		try {
+			Path file = getIconLink(userId, filename).resolve("199icon.png"); //TODO some inteligent way to decide which icon to use (avoid it being just black!)
+			Resource resource = new UrlResource(file.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				return resource;
+			}
+			else {
+				throw new StorageFileNotFoundException(
+						"Could not read file: " + filename);
+
+			}
+		}
+		catch (MalformedURLException e) {
+			throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+		}
+	}
+
+	public boolean doesFileExist(UUID userId, String filename) {
+		String glob = String.format("glob:%s/%s/%s/video.mp4",this.rootLocation.toString(), userId, filename); //
+		PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(glob);
+		try {
+			Optional<Path> path = Files.walk(Paths.get(this.rootLocation.toString())).filter(pathMatcher::matches).findFirst();
+			if (path.isPresent()) {
+				return true;
+
+			} else {
+				return false;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public Resource loadVideoAsResource(String filename) {
+		try {
+			Path file = findStoragePathByFilename(filename).get();
+			System.out.println(String.format("file path: %s", file.toString()));
+			Resource resource = new UrlResource(file.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				return resource;
+			}
+			else {
+				throw new StorageFileNotFoundException(
+						"Could not read file: " + filename);
+
+			}
+		}
+		catch (MalformedURLException e) {
+			throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+		} catch (IOException e) {
+			throw new StorageFileNotFoundException("Could not find file: " + filename, e);
+		}
+	}
+
+	@Override
+	public Resource loadVideoAsResource(UUID userId,String filename) {
+		try {
+			Path filePath = getVideoLink(userId, filename);
+
+			System.out.println(String.format("file path: %s", filePath.toString()));
+			Resource resource = new UrlResource(filePath.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				return resource;
+			}
+			else {
+				throw new StorageFileNotFoundException(
+						"Could not read file: " + filename);
+			}
+		}
+		catch (MalformedURLException e) {
+			throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+		}
 	}
 
 	@Override

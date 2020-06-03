@@ -2,12 +2,11 @@ package com.alexandermilne.mapBackend.datastore;
 
 
 import com.alexandermilne.mapBackend.profile.UserProfile;
+import com.alexandermilne.mapBackend.profile.UserVideo;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Repository("fakeDao")
 public class FakeUserProfileDataStore implements UserDao {
@@ -43,5 +42,59 @@ public class FakeUserProfileDataStore implements UserDao {
         return 0;
     }
 
+    @Override
+    public int addVideoLink(UUID userProfileId, String filename, int price, String regions) {
+        System.out.println(String.format("3 ---- No Error yet!!! FakeUserProfileDataStore -> addVideoLink || userProfileId: %s, filename: %s", userProfileId, filename));
+        System.out.println("USER_PROFILES.toString(): ");
+        for(UserProfile model : USER_PROFILES) {
+            System.out.println(model.toString());
+        }
+        System.out.println(String.format("4 ---- No Error yet!!!USER_PROFILES matching: %s", USER_PROFILES.stream().filter(x -> x.getUserProfileId() == userProfileId)));
 
+        UserProfile u = null;
+        for (UserProfile tempU: USER_PROFILES
+             ) {
+            if (tempU.getUserProfileId().equals(userProfileId)) {
+                u= tempU;
+            }
+
+        }
+        //UserProfile u = USER_PROFILES.stream().filter(x -> x.getUserProfileId() == userProfileId).findFirst().get();
+        System.out.println(String.format("5 ---- No Error yet!!!USER_PROFILES matching: %s", u));
+
+        u.addUserVideoLink(new UserVideo(filename, price, regions));
+        return 0;
+    }
+
+    @Override
+    public UserVideo getVideoInfo(UUID userProfileId, String filename) {
+        UserProfile u = null;
+        for (UserProfile tempU: USER_PROFILES)
+        {
+            if (tempU.getUserProfileId().equals(userProfileId)) {
+                u= tempU;
+            }
+
+        }
+        if (u==null) {
+            return null;
+        }
+        Optional<List<UserVideo>> UserVideos = u.getUserVideoLinks();
+        if (UserVideos.isEmpty()){
+            return null;
+        }
+        UserVideo Video = null;
+        for (UserVideo tempV: UserVideos.get())
+        {
+            if (tempV.filename.equals(filename)) {
+                Video= tempV;
+            }
+
+        }
+        if (Video==null) {
+            return null;
+        }
+        return Video;
+
+    }
 }

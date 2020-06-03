@@ -3,9 +3,7 @@ package com.alexandermilne.mapBackend.profile;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class UserProfile {
 
@@ -13,18 +11,21 @@ public class UserProfile {
     @NotBlank
     private String username;
     private String userProfileImageLink; //s3 key
-    private String userVideoLink;
+    private List<UserVideo> userVideoLinks;
+    //private String userVideoLink;
 
     public UserProfile(@JsonProperty("userProfileId") UUID userProfileId, @JsonProperty("username") String username, @JsonProperty("userProfileImageLink") String userProfileImageLink) {
         this.userProfileId = userProfileId;
         this.username = username;
         this.userProfileImageLink = userProfileImageLink;
+        this.userVideoLinks = new ArrayList<>();
     }
 
     public UserProfile(UUID userProfileId, String username) {
         this.userProfileId = userProfileId;
         this.username = username;
         this.userProfileImageLink = null;
+        this.userVideoLinks = new ArrayList<>();
     }
 
 
@@ -50,6 +51,20 @@ public class UserProfile {
 
     public void setUserProfileImageLink(String userProfileImageLink) {
         this.userProfileImageLink = userProfileImageLink;
+    }
+
+    public Optional<List<UserVideo>> getUserVideoLinks() {
+        return Optional.ofNullable(userVideoLinks);
+    }
+
+    public void addUserVideoLink(UserVideo userVideoUpload) {
+        this.userVideoLinks.add(userVideoUpload);
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("UserProfile ->  userProfileId: %s, username: %s, userProfileImageLink: %s, List<UserVideo>: %s", userProfileId, username, userProfileImageLink, userVideoLinks);
     }
 
     @Override

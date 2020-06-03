@@ -3,13 +3,16 @@ package com.alexandermilne.mapBackend.profile;
 import com.alexandermilne.mapBackend.bucket.ImageBucketName;
 import com.alexandermilne.mapBackend.bucket.VideoBucketName;
 import com.alexandermilne.mapBackend.datastore.UserDao;
+import com.alexandermilne.mapBackend.filestore.local.storage.StorageService;
 import com.alexandermilne.mapBackend.filestore.s3.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 
@@ -19,13 +22,15 @@ import static org.apache.http.entity.ContentType.*;
 public class UserProfileDataAccessService {
 
     private final UserDao userDao;
-    public FileStore fileStore;
+    public FileStore awsFileStore;
+    private final StorageService localStorageService;
 
     @Autowired
     public UserProfileDataAccessService(@Qualifier("fakeDao") UserDao userDao,
-                                        FileStore fileStore) {
+                                        FileStore awsFileStore, StorageService storageService) {
         this.userDao = userDao;
-        this.fileStore = fileStore;
+        this.awsFileStore = awsFileStore;
+        this.localStorageService = storageService;
     }
 
 
@@ -47,7 +52,7 @@ public class UserProfileDataAccessService {
     }
 
 
-    List<UserProfile> getUserProfiles() {
+    public List<UserProfile> getUserProfiles() {
         return userDao.getUserProfiles();
     }
 
@@ -86,7 +91,7 @@ public class UserProfileDataAccessService {
         String path = getPathFormat(user);
         String filename = String.format("%s", file.getOriginalFilename());
         try {
-            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+            awsFileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
             user.setUserProfileImageLink(filename);
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -101,7 +106,7 @@ public class UserProfileDataAccessService {
         String path = getPathFormat(user);
 
         return user.getUserProfileImageLink()
-                .map(key -> fileStore.download(path, key))
+                .map(key -> awsFileStore.download(path, key))
                 .orElse(new byte[0]);
     }
 
@@ -130,7 +135,7 @@ public class UserProfileDataAccessService {
         String path = getPathFormat(user);
         String filename = String.format("%s-%s", file.getOriginalFilename(), UUID.randomUUID());
         try {
-            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+            awsFileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
             user.setUserProfileImageLink(filename);
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -158,7 +163,27 @@ public class UserProfileDataAccessService {
         String path = getPathFormat(user);
 
         return user.getUserProfileImageLink()
-                .map(key -> fileStore.download(path, key))
+                .map(key -> awsFileStore.download(path, key))
                 .orElse(new byte[0]);
     }
+
+    public int uploadUserVideo(UUID userId, MultipartFile file, int price, String regions) {
+        String filename = StringUtils.stripFilenameExtension(StringUtils.cleanPath(file.getOriginalFilename()));
+        if (!localStorageService.doesFileExist(userId, filename)) {
+        System.out.println("1 ----- NOT Errored YET! in UserProfileDataAccessService.java -> uploadUserVideo");
+        localStorageService.store(userId, file);
+
+        System.out.println("2 ----- NOT Errored YET! in UserProfileDataAccessService.java -> uploadUserVideo");
+        userDao.addVideoLink(userId, filename, price, regions);
+        } else {
+            System.out.println("File already uploaded in UserProfileDataAccessService.java -> uploadUserVideo");
+        }
+        return 0;
+    }
+
+    public UserVideo getSmartContract(UUID userId, String filename) {
+        UserVideo videoInfo = userDao.getVideoInfo(userId, filename);
+        return videoInfo;
+    }
+
 }
