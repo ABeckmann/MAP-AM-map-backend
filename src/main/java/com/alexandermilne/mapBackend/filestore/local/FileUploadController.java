@@ -76,7 +76,7 @@ public class FileUploadController {
 
         for (UserProfile u: users
         ) {
-            if (u.getUserProfileId()==userId) {
+            if (u.getUserProfileId().equals(userId)) {
                 if (u.getUserVideoLinks().isPresent()) {
                     for (UserVideo vid: u.getUserVideoLinks().get()
                     ) {
@@ -84,8 +84,6 @@ public class FileUploadController {
                     }
                 }
             }
-
-
         }
         return videoIcons;
     }

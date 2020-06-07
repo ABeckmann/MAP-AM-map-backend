@@ -12,6 +12,7 @@ public class UserProfile {
     private String username;
     private String userProfileImageLink; //s3 key
     private List<UserVideo> userVideoLinks;
+    private List<Licenses> licenses;
     //private String userVideoLink;
 
     public UserProfile(@JsonProperty("userProfileId") UUID userProfileId, @JsonProperty("username") String username, @JsonProperty("userProfileImageLink") String userProfileImageLink) {
