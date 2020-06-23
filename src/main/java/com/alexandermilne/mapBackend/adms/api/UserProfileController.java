@@ -1,5 +1,7 @@
-package com.alexandermilne.mapBackend.profile;
+package com.alexandermilne.mapBackend.adms.api;
 
+import com.alexandermilne.mapBackend.adms.model.User;
+import com.alexandermilne.mapBackend.adms.service.UserProfileDataAccessService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +23,13 @@ public class UserProfileController {
     }
 
     @PostMapping
-    public void addUserProfile(@RequestBody @Valid @NotNull UserProfile userProfile) {
-        dataAccessService.addUserProfile(userProfile);
+    public void addUserProfile(@RequestBody @Valid @NotNull User user) {
+        //dataAccessService.addUser(user);
     }
 
     @GetMapping
-    public List<UserProfile> getUserProfiles() {
-        return dataAccessService.getUserProfiles();
+    public List<User> getUserProfiles() {
+        return dataAccessService.getUsers();
     }
 
     @PostMapping(
@@ -37,14 +39,15 @@ public class UserProfileController {
     public int uploadUserProfileImage(@PathVariable("userProfileId") UUID userProfileId,
                                       @RequestParam("file") MultipartFile file) {
 
-        return dataAccessService.uploadUserProfileImage(userProfileId, file);
+        //return dataAccessService.uploadUserProfileImage(userProfileId, file);
+        return 0;
     }
 
     @GetMapping(
             path = "{userProfileId}/image/download")
     public byte[] downloadUserProfileImage(@PathVariable("userProfileId") UUID userProfileId) {
-
-        return dataAccessService.downloadUserProfileImage(userProfileId);
+        return null;
+        //return dataAccessService.downloadUserProfileImage(userProfileId);
     }
 
 

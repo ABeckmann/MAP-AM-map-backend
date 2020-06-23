@@ -1,7 +1,6 @@
-package com.alexandermilne.mapBackend.filestore.local.storage;
+package com.alexandermilne.mapBackend.adms.service.filestore.local.storage;
 
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
@@ -25,6 +24,9 @@ public interface StorageService {
 	boolean doesFileExist(UUID userId, String filename);
 	Resource loadAsResource(String filename);
 	Resource loadIconAsResource(UUID userId, String filename);
+
+	Resource loadVideoAsResource(Path videoStorageLocation);
+
 	Resource loadVideoAsResource(String filename);
 	Resource loadVideoAsResource(UUID userId,String filename);
 

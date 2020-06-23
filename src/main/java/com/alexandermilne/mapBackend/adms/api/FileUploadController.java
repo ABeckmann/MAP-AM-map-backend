@@ -1,21 +1,23 @@
-package com.alexandermilne.mapBackend.filestore.local;
+package com.alexandermilne.mapBackend.adms.api;
 
-import com.alexandermilne.mapBackend.filestore.local.storage.StorageFileNotFoundException;
-import com.alexandermilne.mapBackend.filestore.local.storage.StorageService;
-import com.alexandermilne.mapBackend.profile.UserProfile;
-import com.alexandermilne.mapBackend.profile.UserProfileDataAccessService;
-import com.alexandermilne.mapBackend.profile.UserVideo;
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
+import com.alexandermilne.mapBackend.adms.service.filestore.local.VideosIconsDisplaySrc;
+import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageFileNotFoundException;
+import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageService;
+import com.alexandermilne.mapBackend.adms.model.User;
+import com.alexandermilne.mapBackend.adms.service.UserProfileDataAccessService;
+import com.alexandermilne.mapBackend.adms.model.UserVideo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,15 +56,15 @@ public class FileUploadController {
 
     @GetMapping("/icons")
     public List<VideosIconsDisplaySrc> vidIcons() {
-        List<UserProfile> users = dataAccessService.getUserProfiles();
+        List<User> users = dataAccessService.getUsers();
         List<VideosIconsDisplaySrc> videoIcons = new ArrayList<>();
 
-        for (UserProfile u: users
+        for (User u: users
         ) {
-            if (u.getUserVideoLinks().isPresent()) {
-                for (UserVideo vid: u.getUserVideoLinks().get()
+            if (u.getUserVideos().isPresent()) {
+                for (UserVideo vid: u.getUserVideos().get()
                 ) {
-                    videoIcons.add(new VideosIconsDisplaySrc(u.getUserProfileId().toString(), vid.filename)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
+                    videoIcons.add(new VideosIconsDisplaySrc(vid.Id.toString(), u.getUserId().toString(), vid.title)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
                 }
             }
 
@@ -71,16 +73,16 @@ public class FileUploadController {
     }
     @GetMapping("/icons/{userId}")
     public List<VideosIconsDisplaySrc> vidIcons(@PathVariable UUID userId) {
-        List<UserProfile> users = dataAccessService.getUserProfiles();
+        List<User> users = dataAccessService.getUsers();
         List<VideosIconsDisplaySrc> videoIcons = new ArrayList<>();
 
-        for (UserProfile u: users
+        for (User u: users
         ) {
-            if (u.getUserProfileId().equals(userId)) {
-                if (u.getUserVideoLinks().isPresent()) {
-                    for (UserVideo vid: u.getUserVideoLinks().get()
+            if (u.getUserId().equals(userId)) {
+                if (u.getUserVideos().isPresent()) {
+                    for (UserVideo vid: u.getUserVideos().get()
                     ) {
-                        videoIcons.add(new VideosIconsDisplaySrc(u.getUserProfileId().toString(), vid.filename)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
+                        videoIcons.add(new VideosIconsDisplaySrc(vid.Id.toString(), u.getUserId().toString(), vid.title)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
                     }
                 }
             }
@@ -125,12 +127,34 @@ public class FileUploadController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
+    @GetMapping("/video/{videoId}")
+    @ResponseBody public ResponseEntity<Resource> serveVideo(
+            @PathVariable UUID videoId) {
+        System.out.println(String.format("serveVideo ->>>>  videoId: %s", videoId));
+        try {
+            String videoStorageLocation = dataAccessService.getVideoStorageLocation(videoId);
+            Resource file = storageService.loadVideoAsResource(Paths.get(videoStorageLocation,"video.mp4"));
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @GetMapping("/{userId}/{filename:.+}/smartcontract")
-    @ResponseBody public UserVideo giveSmartContract(
+    @ResponseBody public UserVideoInfo giveSmartContract(
             @PathVariable String filename,
             @PathVariable UUID userId) {
         return dataAccessService.getSmartContract(userId,filename);
+
+    }
+
+    @GetMapping("/smartcontract/{videoId}")
+    @ResponseBody public List<AvailableLicensesVM> giveSmartContract(
+            @PathVariable UUID videoId) {
+        return dataAccessService.getAvailableLicence(videoId);
+        //return dataAccessService.getSmartContract(userId,filename);
 
     }
 
@@ -153,7 +177,21 @@ public class FileUploadController {
                                  @RequestParam("regions") String regions,
                                    RedirectAttributes redirectAttributes) {
 
-        dataAccessService.uploadUserVideo(userId, file, price, regions);
+        try {
+            dataAccessService.uploadUserVideo(userId, file, price, regions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @PostMapping("/purchaseLicence")
+    public void handleFileUpload(@RequestParam("purchasingUser") UUID purchasingUser,
+                                 @RequestParam("licenceId") UUID licenceId
+    ) {
+
+        dataAccessService.purchaseLicence(purchasingUser, licenceId);
+
 
     }
 

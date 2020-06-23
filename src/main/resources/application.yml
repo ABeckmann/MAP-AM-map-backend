@@ -1,0 +1,23 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/map_db
+    pool-size: 30
+
+
+
+#spring:
+  #    profiles: dev
+  #    # Development database configuration
+  #    datasource.hikari:
+  #        driverClassName: oracle.jdbc.driver.OracleDriver
+  #        jdbcUrl: jdbc:oracle:thin:@url:1621:sid
+  #        type: com.zaxxer.hikari.HikariDataSource
+  #        connectionTimeout:40000
+spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+  flyway:
+    baseline-on-migrate: true

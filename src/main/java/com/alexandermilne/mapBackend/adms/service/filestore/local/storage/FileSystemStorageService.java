@@ -1,12 +1,10 @@
-package com.alexandermilne.mapBackend.filestore.local.storage;
+package com.alexandermilne.mapBackend.adms.service.filestore.local.storage;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -85,11 +83,11 @@ public class FileSystemStorageService implements StorageService {
 		String filename = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
 			if (file.isEmpty()) {
-				throw new com.alexandermilne.mapBackend.filestore.local.storage.StorageException("Failed to store empty file " + filename);
+				throw new com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageException("Failed to store empty file " + filename);
 			}
 			if (filename.contains("..")) {
 				// This is a security check
-				throw new com.alexandermilne.mapBackend.filestore.local.storage.StorageException(
+				throw new com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageException(
 						"Cannot store file with relative path outside current directory "
 								+ filename);
 			}
@@ -115,13 +113,13 @@ public class FileSystemStorageService implements StorageService {
 					g.stop();
 				}
 				catch (FrameGrabber.Exception | IOException e) {
-					throw new com.alexandermilne.mapBackend.filestore.local.storage.StorageException("Failed to store file " + filename, e);
+					throw new com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageException("Failed to store file " + filename, e);
 				}
 
 			}
 		}
 		catch (IOException e) {
-			throw new com.alexandermilne.mapBackend.filestore.local.storage.StorageException("Failed to store file " + filename, e);
+			throw new com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageException("Failed to store file " + filename, e);
 		}
 
 
@@ -178,6 +176,26 @@ public class FileSystemStorageService implements StorageService {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+
+	@Override
+	public Resource loadVideoAsResource(Path videoStorageLocation) {
+		try {
+			System.out.println(String.format("file path: %s", videoStorageLocation.toString()));
+			Resource resource = new UrlResource(videoStorageLocation.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				return resource;
+			}
+			else {
+				throw new StorageFileNotFoundException(
+						"Could not read file: " + videoStorageLocation);
+
+			}
+		}
+		catch (MalformedURLException e) {
+			throw new StorageFileNotFoundException("Could not read file: " + videoStorageLocation, e);
 		}
 	}
 

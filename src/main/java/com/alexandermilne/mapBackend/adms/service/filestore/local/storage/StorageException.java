@@ -1,4 +1,4 @@
-package com.alexandermilne.mapBackend.filestore.local.storage;
+package com.alexandermilne.mapBackend.adms.service.filestore.local.storage;
 
 public class StorageException extends RuntimeException {
 
