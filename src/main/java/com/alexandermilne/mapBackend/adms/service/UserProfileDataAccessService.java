@@ -54,6 +54,10 @@ public class UserProfileDataAccessService {
         return dao.getAllUsers();
     }
 
+    public List<UserVideo> getAllVideos() {
+        return dao.getAllVideos();
+    }
+
 //    private String getVideoPathFormat(User user) {
 //        return String.format("%s/%s", VideoBucketName.PROFILE_IMAGE.getBucketName(), user.getUserId());
 //    }

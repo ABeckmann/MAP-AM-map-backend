@@ -56,18 +56,23 @@ public class FileUploadController {
 
     @GetMapping("/icons")
     public List<VideosIconsDisplaySrc> vidIcons() {
-        List<User> users = dataAccessService.getUsers();
+        //List<User> users = dataAccessService.getUsers();
+        List<UserVideo> videos = dataAccessService.getAllVideos();
         List<VideosIconsDisplaySrc> videoIcons = new ArrayList<>();
 
-        for (User u: users
+//        for (User u: users
+//        ) {
+//            if (u.getUserVideos().isPresent()) {
+//                for (UserVideo vid: u.getUserVideos().get()
+//                ) {
+//                    videoIcons.add(new VideosIconsDisplaySrc(vid.Id.toString(), u.getUserId().toString(), vid.title)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
+//                }
+//            }
+//
+//        }
+        for (UserVideo vid: videos
         ) {
-            if (u.getUserVideos().isPresent()) {
-                for (UserVideo vid: u.getUserVideos().get()
-                ) {
-                    videoIcons.add(new VideosIconsDisplaySrc(vid.Id.toString(), u.getUserId().toString(), vid.title)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
-                }
-            }
-
+            videoIcons.add(new VideosIconsDisplaySrc(vid.Id.toString(), vid.videoOwnerId.toString(), vid.title)); //, storageService.getIconLink(u.getUserProfileId(), vid.filename).toString())
         }
         return videoIcons;
     }

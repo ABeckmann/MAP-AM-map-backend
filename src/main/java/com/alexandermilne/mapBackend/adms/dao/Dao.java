@@ -3,6 +3,7 @@ package com.alexandermilne.mapBackend.adms.dao;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
 import com.alexandermilne.mapBackend.adms.model.User;
+import com.alexandermilne.mapBackend.adms.model.UserVideo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public interface Dao {
     UUID addVideo(UUID userId, String filename, String strStorageLocation);
     int addAvailableLicence(UUID videoId, int price, String regions);
 
+    List<UserVideo> getAllVideos();
     UserVideoInfo getVideoInfo(UUID userId, String filename);
 
     Optional<String> getVideoStorageLocation(UUID videoId);
