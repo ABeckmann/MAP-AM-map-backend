@@ -7,13 +7,15 @@ import java.util.UUID;
 
 public class AvailableLicensesVM {
     public UUID licenceId;
+    public UUID ownerId;
     public int price;
     public String region;
 
-    public AvailableLicensesVM(UUID licenceId, int price, String region) {
+    public AvailableLicensesVM(UUID licenceId, int price, String region, UUID ownerId) {
         this.licenceId = licenceId;
         this.price = price;
         this.region = region;
+        this.ownerId = ownerId;
     }
     //public UUID videoId;
 

@@ -19,10 +19,10 @@ CREATE TABLE "availableLicence" (
   "region" varchar(100) NOT NULL
 );
 
-CREATE TABLE "userLicense" (
+CREATE TABLE "userLicence" (
   "Id" uuid NOT NULL PRIMARY KEY,
   "videoId" uuid NOT NULL REFERENCES "video" ("Id"),
-  "licenseOwnerId" uuid NOT NULL REFERENCES "map_user" ("Id"),
+  "licenceOwnerId" uuid NOT NULL REFERENCES "map_user" ("Id"),
   "price" int NOT NULL,
   "region" varchar(100) NOT NULL
 );

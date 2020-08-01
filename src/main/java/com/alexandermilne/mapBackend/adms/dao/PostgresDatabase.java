@@ -114,6 +114,7 @@ public class PostgresDatabase implements Dao {
                     rs.getInt("price"),
                     rs.getString("region"),
                     UUID.fromString(rs.getString("videoId"))
+
             );
         });
 
@@ -241,19 +242,80 @@ public class PostgresDatabase implements Dao {
     @Override
     public List<AvailableLicensesVM> getAvailableLicences(UUID videoId) {
 
-        final String sql = String.format("SELECT \"Id\", \"price\", \"region\"\n" +
-                "\tFROM public.\"availableLicence\"\n" +
-                "\tWHERE \"videoId\"='%s';", videoId);
+        final String sql = String.format(
+                "SELECT public.\"availableLicence\".\"Id\", public.\"video\".\"videoOwnerId\", public.\"availableLicence\".\"videoId\", public.\"availableLicence\".price, public.\"availableLicence\".region\n" +
+                        "FROM public.\"availableLicence\"\n" +
+                        "INNER JOIN public.\"video\" ON public.\"availableLicence\".\"videoId\"=public.\"video\".\"Id\"\n" +
+                        "WHERE \"videoId\"='%s';", videoId);
 
+//                "SELECT \"Id\", \"price\", \"region\"\n" +
+//                "\tFROM public.\"availableLicence\"\n" +
+//                "\tWHERE \"videoId\"='%s';", videoId);
 
         List<AvailableLicensesVM> availableLicensesVM = jdbcTemplate.query(sql, (rs, i) -> {
             AvailableLicensesVM item = new AvailableLicensesVM(
                     UUID.fromString(rs.getString("Id")),
                     rs.getInt("price"),
-                    rs.getString("region")
+                    rs.getString("region"),
+                    UUID.fromString(rs.getString("videoOwnerId"))
             );
             return item;
         });
         return availableLicensesVM;
+    }
+
+    public Optional<AvailableLicense> getAvailableLicenceById(UUID licenceId) {
+        final String sql = "SELECT *" +
+                "    FROM public.\"availableLicence\"\n" +
+                "    WHERE \"Id\"=?;";
+
+
+        AvailableLicense u = jdbcTemplate.queryForObject(sql, new Object[]{licenceId},
+                (resultSet, i) -> {
+                    UUID uId = UUID.fromString(resultSet.getString("Id"));
+                    AvailableLicense tempU = new AvailableLicense(
+                            uId,
+                            resultSet.getInt("price"),
+                            resultSet.getString("region"),
+                            UUID.fromString(resultSet.getString("videoId"))
+                    );
+                    return tempU;
+                }
+
+        );
+        return Optional.ofNullable(u);
+    }
+
+    public boolean deleteAvailableLicense(UUID licenceId){
+        String sql = "DELETE FROM public.\"availableLicence\" " +
+                "WHERE \"Id\"=?;";
+        Object[] args = new Object[] {licenceId};
+        return jdbcTemplate.update(sql, args) == 1;
+    }
+
+    public void createUserLicence(UUID videoId, UUID licenceOwner, int price, String region){
+        final String sql = String.format("INSERT INTO public.\"userLicence\"(\n" +
+                "        \"Id\", \"videoId\", price, \"region\")\n" +
+                "        VALUES ('%s', '%s', %s, '%s');", UUID.randomUUID(), videoId, price, region);
+
+        jdbcTemplate.update(sql);
+    }
+
+    @Override
+    public void purchaseLicence(UUID purchasingUser, UUID licenceId) {
+        Optional<AvailableLicense> availableLicenceOpt = getAvailableLicenceById(licenceId);
+        final String sql = String.format("INSERT INTO public.\"availableLicence\"(\n" +
+                "        \"Id\", \"videoId\", price, \"region\")\n" +
+                "        VALUES ('%s', '%s', %s, '%s');", UUID.randomUUID(), videoId, price, region);
+        if (availableLicenceOpt.isPresent()) {
+            AvailableLicense availableLicence = availableLicenceOpt.get();
+            deleteAvailableLicense(licenceId);
+            jdbcTemplate.update(sql);
+        }
+
+
+
+
+        //#TODO
     }
 }
