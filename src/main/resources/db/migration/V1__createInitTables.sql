@@ -12,17 +12,10 @@ CREATE TABLE "video" (
   "localStorageLocation" varchar(100) NOT NULL
 );
 
-CREATE TABLE "availableLicence" (
+CREATE TABLE "userVideoLicence" (
   "Id" uuid NOT NULL PRIMARY KEY,
   "videoId" uuid NOT NULL REFERENCES "video" ("Id"),
-  "price" int NOT NULL,
-  "region" varchar(100) NOT NULL
-);
-
-CREATE TABLE "userLicence" (
-  "Id" uuid NOT NULL PRIMARY KEY,
-  "videoId" uuid NOT NULL REFERENCES "video" ("Id"),
-  "licenceOwnerId" uuid NOT NULL REFERENCES "map_user" ("Id"),
+  "licenceOwnerId" uuid REFERENCES "map_user" ("Id"),
   "price" int NOT NULL,
   "region" varchar(100) NOT NULL
 );

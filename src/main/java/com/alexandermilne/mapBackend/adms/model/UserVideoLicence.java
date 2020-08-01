@@ -2,11 +2,11 @@ package com.alexandermilne.mapBackend.adms.model;
 
 import java.util.UUID;
 
-public class AvailableLicense {
+public class UserVideoLicence {
     public UUID Id;
 
     public int price;
-    public String regions;
+    public String region;
 
 
     public UUID videoId;
@@ -14,10 +14,10 @@ public class AvailableLicense {
     //public String userVideoLink;
 
 
-    public  AvailableLicense(UUID id, int price, String regions, UUID videoId) {//, UserVideo userVideo
+    public UserVideoLicence(UUID id, int price, String region, UUID videoId) {//, UserVideo userVideo
         Id = id;
         this.price = price;
-        this.regions = regions;
+        this.region = region;
         this.videoId = videoId;
 
 //        this.userVideo = userVideo;

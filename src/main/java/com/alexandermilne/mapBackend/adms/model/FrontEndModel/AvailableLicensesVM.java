@@ -1,8 +1,5 @@
 package com.alexandermilne.mapBackend.adms.model.FrontEndModel;
 
-import com.alexandermilne.mapBackend.adms.model.AvailableLicense;
-
-import java.util.List;
 import java.util.UUID;
 
 public class AvailableLicensesVM {

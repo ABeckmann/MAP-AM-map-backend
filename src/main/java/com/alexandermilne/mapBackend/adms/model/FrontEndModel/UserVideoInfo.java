@@ -1,11 +1,5 @@
 package com.alexandermilne.mapBackend.adms.model.FrontEndModel;
 
-import com.alexandermilne.mapBackend.adms.model.AvailableLicense;
-import com.alexandermilne.mapBackend.adms.model.UserLicense;
-
-import java.util.List;
-import java.util.UUID;
-
 public class UserVideoInfo {
     public String title;
     public int price;

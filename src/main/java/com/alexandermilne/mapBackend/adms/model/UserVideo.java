@@ -10,7 +10,7 @@ public class UserVideo {
     public String localStorageLocation;
 
     public List<UserLicense> userLicences;
-    public List<AvailableLicense> availableLicenses;
+    public List<UserVideoLicence> availableLicenses;
 
     public UserVideo(UUID id, UUID videoOwnerId, String title, String localStorageLocation) {
         Id = id;
@@ -24,7 +24,7 @@ public class UserVideo {
     public void setUserLicences(List<UserLicense> userLicences){
         this.userLicences=userLicences;
     }
-    public void setAvailableLicense(List<AvailableLicense> availableLicenses){
+    public void setAvailableLicense(List<UserVideoLicence> availableLicenses){
         this.availableLicenses=availableLicenses;
     }
 }
