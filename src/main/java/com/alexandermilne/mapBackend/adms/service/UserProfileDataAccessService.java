@@ -2,6 +2,7 @@ package com.alexandermilne.mapBackend.adms.service;
 
 import com.alexandermilne.mapBackend.adms.dao.Dao;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.MyLicencesByVideoVM;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
 import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageService;
 import com.alexandermilne.mapBackend.adms.service.filestore.s3.FileStore;
@@ -204,7 +205,7 @@ public class UserProfileDataAccessService {
                 ) {
             dao.addAvailableLicence(videoId, price, r);
         }
-
+        System.out.println("3 ----- Done");
         return 0;
     }
 
@@ -216,6 +217,11 @@ public class UserProfileDataAccessService {
     public List<AvailableLicensesVM> getAvailableLicence(UUID videoId) {
         return dao.getAvailableLicences(videoId);
     }
+
+    public List<MyLicencesByVideoVM> getMyLicences(UUID videoId) {
+        return dao.getMyLicences(videoId);
+    }
+
 
     public String getVideoStorageLocation(UUID videoId) throws Exception {
         return dao.getVideoStorageLocation(videoId).orElseThrow(() -> new Exception("video does not have a local storage location"));

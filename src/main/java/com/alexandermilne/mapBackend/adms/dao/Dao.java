@@ -1,6 +1,7 @@
 package com.alexandermilne.mapBackend.adms.dao;
 
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.MyLicencesByVideoVM;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
 import com.alexandermilne.mapBackend.adms.model.User;
 import com.alexandermilne.mapBackend.adms.model.UserVideo;
@@ -33,6 +34,7 @@ public interface Dao {
     Optional<String> getVideoStorageLocation(UUID videoId);
 
     List<AvailableLicensesVM> getAvailableLicences(UUID videoId);
+    List<MyLicencesByVideoVM> getMyLicences(UUID userId);
 
     void purchaseLicence(UUID purchasingUser, UUID licenceId);
     //List<Person> selectAllPeople();

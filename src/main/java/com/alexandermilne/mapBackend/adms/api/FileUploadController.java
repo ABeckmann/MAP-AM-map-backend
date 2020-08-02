@@ -1,6 +1,7 @@
 package com.alexandermilne.mapBackend.adms.api;
 
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.MyLicencesByVideoVM;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
 import com.alexandermilne.mapBackend.adms.service.filestore.local.VideosIconsDisplaySrc;
 import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageFileNotFoundException;
@@ -159,6 +160,14 @@ public class FileUploadController {
     @ResponseBody public List<AvailableLicensesVM> giveSmartContract(
             @PathVariable UUID videoId) {
         return dataAccessService.getAvailableLicence(videoId);
+        //return dataAccessService.getSmartContract(userId,filename);
+
+    }
+
+    @GetMapping("/myLicences/{userId}")
+    @ResponseBody public List<MyLicencesByVideoVM> getMyLicences(
+            @PathVariable UUID userId) {
+        return dataAccessService.getMyLicences(userId);
         //return dataAccessService.getSmartContract(userId,filename);
 
     }

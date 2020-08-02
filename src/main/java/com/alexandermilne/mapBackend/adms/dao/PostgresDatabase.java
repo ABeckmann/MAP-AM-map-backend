@@ -1,19 +1,17 @@
 package com.alexandermilne.mapBackend.adms.dao;
 
+import com.alexandermilne.mapBackend.adms.model.FrontEndModel.MyLicencesByVideoVM;
 import com.alexandermilne.mapBackend.adms.model.UserVideoLicence;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.AvailableLicensesVM;
 import com.alexandermilne.mapBackend.adms.model.FrontEndModel.UserVideoInfo;
 import com.alexandermilne.mapBackend.adms.model.User;
-import com.alexandermilne.mapBackend.adms.model.UserLicense;
 import com.alexandermilne.mapBackend.adms.model.UserVideo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Repository("PostgresDao")
 public class PostgresDatabase implements Dao {
@@ -282,6 +280,8 @@ public class PostgresDatabase implements Dao {
         return availableLicensesVM;
     }
 
+
+
     public Optional<UserVideoLicence> getAvailableLicenceById(UUID licenceId) {
         final String sql = "SELECT *" +
                 "    FROM public.\"userVideoLicence\"\n" +
@@ -302,6 +302,58 @@ public class PostgresDatabase implements Dao {
 
         );
         return Optional.ofNullable(u);
+    }
+
+    public List<MyLicencesByVideoVM> getMyLicences(UUID userId) {
+
+        final String sql = String.format(
+                "SELECT uvl.\"Id\", uvl.\"videoId\", uvl.\"licenceOwnerId\", uvl.price, uvl.region, vid.\"videoOwnerId\"\n" +
+                        "FROM public.\"userVideoLicence\" AS uvl\n" +
+                        "INNER JOIN public.\"video\" AS vid ON uvl.\"videoId\"=vid.\"Id\"\n" +
+                        "WHERE \"licenceOwnerId\"='%s';", userId);
+
+//                "SELECT \"Id\", \"price\", \"region\"\n" +
+//                "\tFROM public.\"availableLicence\"\n" +
+//                "\tWHERE \"videoId\"='%s';", videoId);
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        List<MyLicencesByVideoVM> myLicencesByVideoVM = new ArrayList<>();
+
+        for (Map<String, Object> map: list)
+        {
+            UUID videoId = (UUID) map.get("videoId"); //UUID.fromString((String) map.get("videoId"));
+            Optional<MyLicencesByVideoVM> temp = myLicencesByVideoVM.stream().filter(o -> o.videoId.equals(videoId)).findFirst();
+            MyLicencesByVideoVM myLicenceByVideoVM;
+            if (temp.isPresent()) {
+                myLicenceByVideoVM = temp.get();
+            } else {
+                myLicenceByVideoVM = new MyLicencesByVideoVM(videoId);
+                myLicencesByVideoVM.add(myLicenceByVideoVM);
+            }
+            AvailableLicensesVM availableLicensesVM = new AvailableLicensesVM(
+                    (UUID) map.get("Id"),
+                    (Integer) map.get("price"),
+                    (String) map.get("region"),
+                    (UUID) map.get("videoOwnerId")
+                    //UUID.fromString((String) map.get("videoOwnerId"))
+            );
+            myLicenceByVideoVM.addLicence(availableLicensesVM);
+
+        }
+        return myLicencesByVideoVM;
+//        List<MyLicencesByVideoVM> myLicencesByVideoVM = jdbcTemplate.query(sql, (rs, i) -> {
+//            MyLicencesByVideoVM video = new MyLicencesByVideoVM(
+//                    UUID.fromString(rs.getString("videoId")),
+//                    new AvailableLicensesVM(
+//                            UUID.fromString(rs.getString("Id")),
+//                            rs.getInt("price"),
+//                            rs.getString("region"),
+//                            UUID.fromString(rs.getString("videoOwnerId"))
+//                    )
+//            );
+//            return item;
+//        });
+
     }
 
 //    public boolean deleteAvailableLicense(UUID licenceId){
