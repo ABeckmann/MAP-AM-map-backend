@@ -55,6 +55,11 @@ public class UserProfileDataAccessService {
         return dao.getAllUsers();
     }
 
+    public int getUserAccountBalance(UUID userId) {
+        return dao.getUserAccountBalance(userId);
+
+    }
+
     public List<UserVideo> getAllVideos() {
         return dao.getAllVideos();
     }
@@ -185,11 +190,13 @@ public class UserProfileDataAccessService {
         if (maybeU.isEmpty()) {
             throw new Exception(String.format("there is no user %s", userId));
         }
-        User u = maybeU.get();
+        //User u = maybeU.get();
+
+        List<UserVideo> userVideos = dao.getAllUserVideos(userId);
 
         String strStorageLocation = localStorageService.getStoragePath(userId, filename).toString();
         //        if (u.getUserVideos().get().stream().map(x->x.localStorageLocation).collect(Collectors.toList()).contains(strStorageLocation)) {
-        if (u.getUserVideos().get().stream().anyMatch(x->x.localStorageLocation.equals(strStorageLocation))) {
+        if (userVideos.stream().anyMatch(x->x.localStorageLocation.equals(strStorageLocation))) {
             System.out.println("File already uploaded in UserProfileDataAccessService.java -> uploadUserVideo");
             throw new Exception(String.format("there is already a video %s, stored at %s", filename, strStorageLocation));
         }

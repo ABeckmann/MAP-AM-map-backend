@@ -219,6 +219,21 @@ public class PostgresDatabase implements Dao {
     }
 
     @Override
+    public int getUserAccountBalance(UUID userId) {
+        final String sql = "SELECT \"userMoney\"\n" +
+                "\tFROM public.map_user\n" +
+                "\tWHERE \"Id\"=?;";
+
+
+
+        int item = jdbcTemplate.queryForObject(sql, new Object[]{userId},
+                (resultSet, i) -> resultSet.getInt("userMoney")
+        );
+
+        return item;
+    }
+
+    @Override
     public List<UserVideo> getAllVideos() {
         final String sqlUserVideos = String.format("SELECT *\n" +
                 "\tFROM public.video;");
@@ -235,6 +250,27 @@ public class PostgresDatabase implements Dao {
         });
         return videos;
     }
+
+    @Override
+    public List<UserVideo> getAllUserVideos(UUID userId) {
+        final String sqlUserVideos = String.format("SELECT *\n" +
+                "\tFROM public.video\n" +
+                "WHERE \"videoOwnerId\"='%s';", userId);
+
+        List<UserVideo> videos = jdbcTemplate.query(sqlUserVideos, (rs, i) -> {
+            UUID videoId = UUID.fromString(rs.getString("Id"));
+            UserVideo uv = new UserVideo(
+                    videoId,
+                    UUID.fromString(rs.getString("videoOwnerId")),
+                    rs.getString("title"),
+                    rs.getString("localStorageLocation")
+            );
+            return uv;
+        });
+        return videos;
+    }
+
+
 
     @Override
     public UserVideoInfo getVideoInfo(UUID userProfileId, String filename) {
@@ -282,7 +318,7 @@ public class PostgresDatabase implements Dao {
 
 
 
-    public Optional<UserVideoLicence> getAvailableLicenceById(UUID licenceId) {
+    public Optional<UserVideoLicence> getLicenceById(UUID licenceId) {
         final String sql = "SELECT *" +
                 "    FROM public.\"userVideoLicence\"\n" +
                 "    WHERE \"Id\"=? AND (\"licenceOwnerId\" IS NULL);";
@@ -307,7 +343,7 @@ public class PostgresDatabase implements Dao {
     public List<MyLicencesByVideoVM> getMyLicences(UUID userId) {
 
         final String sql = String.format(
-                "SELECT uvl.\"Id\", uvl.\"videoId\", uvl.\"licenceOwnerId\", uvl.price, uvl.region, vid.\"videoOwnerId\"\n" +
+                "SELECT uvl.\"Id\", uvl.\"videoId\", uvl.\"licenceOwnerId\", uvl.price, uvl.region, vid.\"videoOwnerId\", vid.\"title\"\n" +
                         "FROM public.\"userVideoLicence\" AS uvl\n" +
                         "INNER JOIN public.\"video\" AS vid ON uvl.\"videoId\"=vid.\"Id\"\n" +
                         "WHERE \"licenceOwnerId\"='%s';", userId);
@@ -327,7 +363,8 @@ public class PostgresDatabase implements Dao {
             if (temp.isPresent()) {
                 myLicenceByVideoVM = temp.get();
             } else {
-                myLicenceByVideoVM = new MyLicencesByVideoVM(videoId);
+                String videoTitle = (String) map.get("title");
+                myLicenceByVideoVM = new MyLicencesByVideoVM(videoId, videoTitle);
                 myLicencesByVideoVM.add(myLicenceByVideoVM);
             }
             AvailableLicensesVM availableLicensesVM = new AvailableLicensesVM(
@@ -373,19 +410,51 @@ public class PostgresDatabase implements Dao {
 
     @Override
     public void purchaseLicence(UUID purchasingUser, UUID licenceId) {
-        //Optional<UserVideoLicence> availableLicenceOpt = getAvailableLicenceById(licenceId);
+        Optional<UserVideoLicence> availableLicenceOpt = getLicenceById(licenceId);
+        UserVideoLicence uvl;
+        if (availableLicenceOpt.isPresent()) {
+            uvl = availableLicenceOpt.get();
+            try {
+                deductUserBalance(purchasingUser, uvl.price);
+                setLicenceOwner(purchasingUser, licenceId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+        } else {
+            //#TODO throw new Exception("licence not present");
+        }
+
+
+
+        //}
+
+    }
+
+    public void deductUserBalance(UUID purchasingUser, int amount) throws Exception {
+        int userBalance = getUserAccountBalance(purchasingUser);
+        if (userBalance >= amount) {
+            final String sql = String.format(
+                    "UPDATE public.map_user\n" +
+                            "\tSET \"userMoney\"=?\n" +
+                            "\tWHERE \"Id\"=?;");
+            int updatedBalance = userBalance-amount;
+            jdbcTemplate.update(sql, updatedBalance, purchasingUser);
+        }
+        else {
+            throw new Exception("user does not have the required balance");
+        }
+    }
+
+    public void setLicenceOwner(UUID purchasingUser, UUID licenceId){
         final String sql = String.format(
                 "UPDATE public.\"userVideoLicence\" " +
                         "SET \"licenceOwnerId\"=? " +
                         "WHERE \"Id\"=?;");
 
         //if (availableLicenceOpt.isPresent()) {
-            //UserVideoLicence userVideoLicence = availableLicenceOpt.get();
-            //deleteAvailableLicense(licenceId);
+        //UserVideoLicence userVideoLicence = availableLicenceOpt.get();
+        //deleteAvailableLicense(licenceId);
         int temp = jdbcTemplate.update(sql, purchasingUser, licenceId);
-
-        //}
-
     }
 }

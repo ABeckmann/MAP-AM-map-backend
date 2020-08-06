@@ -22,6 +22,13 @@ public class UserProfileController {
         this.dataAccessService = dataAccessService;
     }
 
+    @PostMapping(
+            path = "accountBalance")
+    public int getAccountBalance(@RequestParam("userId") UUID userId) {
+        return dataAccessService.getUserAccountBalance(userId);
+        //return dataAccessService.downloadUserProfileImage(userProfileId);
+    }
+
     @PostMapping
     public void addUserProfile(@RequestBody @Valid @NotNull User user) {
         //dataAccessService.addUser(user);

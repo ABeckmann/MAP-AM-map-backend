@@ -22,8 +22,8 @@ CREATE TABLE "userVideoLicence" (
 
 INSERT INTO public.map_user(
 	"Id", username, "userProfileImageLink", "userMoney")
-	VALUES ('93bf9ae1-2a1f-47b1-83f6-e9fe4ba1710a', 'James', NULL, 100);
+	VALUES ('93bf9ae1-2a1f-47b1-83f6-e9fe4ba1710a', 'User1', NULL, 100);
 
 INSERT INTO public.map_user(
 	"Id", username, "userProfileImageLink", "userMoney")
-	VALUES ('6203c0f4-63d1-4d51-91f5-64de0ee6073d', 'Bob', NULL, 200);
+	VALUES ('6203c0f4-63d1-4d51-91f5-64de0ee6073d', 'User2', NULL, 200);

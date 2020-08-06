@@ -6,10 +6,12 @@ import java.util.UUID;
 
 public class MyLicencesByVideoVM {
     public UUID videoId;
+    public String videoTitle;
     public List<AvailableLicensesVM> licences;
 
-    public MyLicencesByVideoVM(UUID videoId) {
+    public MyLicencesByVideoVM(UUID videoId, String videoTitle) {
         this.videoId = videoId;
+        this.videoTitle = videoTitle;
         this.licences = new ArrayList<>();
     }
 

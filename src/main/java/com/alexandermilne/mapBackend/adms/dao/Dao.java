@@ -23,12 +23,15 @@ public interface Dao {
     List<User> getAllUsers();
     Optional<User> getUserById(UUID userId);
 
+
     int uploadUserImage(UUID userId, MultipartFile file);
     int uploadVideoToAws(UUID userId, MultipartFile file);
     UUID addVideo(UUID userId, String filename, String strStorageLocation);
     int addAvailableLicence(UUID videoId, int price, String regions);
 
+    int getUserAccountBalance(UUID userId);
     List<UserVideo> getAllVideos();
+    List<UserVideo> getAllUserVideos(UUID userId);
     UserVideoInfo getVideoInfo(UUID userId, String filename);
 
     Optional<String> getVideoStorageLocation(UUID videoId);
