@@ -1,4 +1,4 @@
-//package com.alexandermilne.mapBackend.config;
+package com.alexandermilne.mapBackend.config;
 //import com.amazonaws.auth.AWSCredentials;
 //import com.amazonaws.auth.AWSStaticCredentialsProvider;
 //import com.amazonaws.auth.BasicAWSCredentials;
@@ -9,7 +9,7 @@
 //import org.springframework.context.annotation.Configuration;
 //
 //@Configuration
-//public class EXAMPLE_AmazonConfig {
+//public class AmazonConfig {
 //
 //    @Bean
 //    public AmazonS3 s3 (){

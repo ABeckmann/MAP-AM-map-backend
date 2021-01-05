@@ -1,4 +1,4 @@
-package com.alexandermilne.mapBackend.config;//package com.alexandermilne.mapBackend.config;
+package com.alexandermilne.mapBackend.config;
 
 //import com.zaxxer.hikari.HikariDataSource;
 //import org.springframework.boot.context.properties.ConfigurationProperties;
