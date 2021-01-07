@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageService;
 import com.alexandermilne.mapBackend.adms.service.filestore.local.storage.StorageProperties;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties.class)
@@ -23,6 +24,11 @@ public class Main {
 			//storageService.deleteAll();
 			storageService.init();
 		};
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
 	}
 
 }
